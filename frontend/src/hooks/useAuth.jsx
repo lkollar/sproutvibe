@@ -7,6 +7,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [kioskMode, setKioskMode] = useState(false)
+  const [registrationEnabled, setRegistrationEnabled] = useState(true)
 
   async function _startDemoSession() {
     try {
@@ -24,7 +25,10 @@ export function AuthProvider({ children }) {
     // Fetch kiosk status once; reuse the promise in both branches below
     const kioskPromise = getKioskStatus().catch(() => ({ kiosk_mode: false }))
 
-    kioskPromise.then(d => setKioskMode(d.kiosk_mode))
+    kioskPromise.then(d => {
+      setKioskMode(d.kiosk_mode)
+      setRegistrationEnabled(d.registration_enabled ?? true)
+    })
 
     const boot = token
       ? getMe()
@@ -37,7 +41,7 @@ export function AuthProvider({ children }) {
       : kioskPromise.then(d => (d.kiosk_mode ? _startDemoSession() : null))
 
     boot.finally(() => setLoading(false))
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   const signIn = (token, userData) => {
     localStorage.setItem('token', token)
@@ -51,7 +55,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, kioskMode, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, loading, kioskMode, registrationEnabled, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   )

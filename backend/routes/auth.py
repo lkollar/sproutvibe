@@ -17,6 +17,11 @@ from core.security import (
 from models.user import User
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+TRUTHY_VALUES = {"1", "true", "yes", "on"}
+
+
+def is_registration_enabled() -> bool:
+    return os.getenv("REGISTRATION_ENABLED", "true").lower() in TRUTHY_VALUES
 
 
 class RegisterRequest(BaseModel):
@@ -42,6 +47,9 @@ class UserOut(BaseModel):
 
 @router.post("/register", response_model=UserOut, status_code=201)
 def register(req: RegisterRequest, db: Session = Depends(get_db)):
+    if not is_registration_enabled():
+        raise HTTPException(status_code=403, detail="Registration is disabled")
+
     if db.query(User).filter(User.email == req.email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
     user = User(
@@ -88,7 +96,10 @@ def update_me(
 @router.get("/kiosk")
 def kiosk_status():
     """Public endpoint — returns whether kiosk/demo mode is enabled."""
-    return {"kiosk_mode": os.getenv("KIOSK_MODE", "false").lower() == "true"}
+    return {
+        "kiosk_mode": os.getenv("KIOSK_MODE", "false").lower() == "true",
+        "registration_enabled": is_registration_enabled(),
+    }
 
 
 @router.post("/demo", response_model=TokenResponse)

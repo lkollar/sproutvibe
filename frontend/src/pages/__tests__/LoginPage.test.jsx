@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import LoginPage from '../LoginPage'
@@ -18,7 +18,7 @@ vi.mock('react-router-dom', async (importOriginal) => {
   return { ...actual, useNavigate: () => vi.fn() }
 })
 
-import { login, getMe } from '../../api/auth'
+import { login, getKioskStatus, getMe } from '../../api/auth'
 
 function renderLoginPage() {
   return render(
@@ -35,6 +35,7 @@ describe('LoginPage', () => {
     localStorage.clear()
     vi.clearAllMocks()
     getMe.mockResolvedValue({ id: 1, name: 'Test', email: 'test@example.com' })
+    getKioskStatus.mockResolvedValue({ kiosk_mode: false, registration_enabled: true })
   })
 
   it('renders the sign-in form', () => {
@@ -49,6 +50,17 @@ describe('LoginPage', () => {
     expect(screen.queryByPlaceholderText('Your name')).not.toBeInTheDocument()
     await userEvent.click(screen.getByText('Create account'))
     expect(screen.getByPlaceholderText('Your name')).toBeInTheDocument()
+  })
+
+  it('hides registration when disabled', async () => {
+    getKioskStatus.mockResolvedValue({
+      kiosk_mode: false,
+      registration_enabled: false,
+    })
+    renderLoginPage()
+    await waitFor(() => {
+      expect(screen.queryByText('Create account')).not.toBeInTheDocument()
+    })
   })
 
   it('calls login on form submit', async () => {

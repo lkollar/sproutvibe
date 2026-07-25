@@ -10,6 +10,23 @@ def test_register(client):
     assert "id" in data
 
 
+def test_register_disabled(client, monkeypatch):
+    monkeypatch.setenv("REGISTRATION_ENABLED", "false")
+    resp = client.post(
+        "/auth/register",
+        json={"name": "Alice", "email": "alice@example.com", "password": "secret123"},
+    )
+    assert resp.status_code == 403
+    assert resp.json()["detail"] == "Registration is disabled"
+
+
+def test_registration_status(client, monkeypatch):
+    monkeypatch.setenv("REGISTRATION_ENABLED", "false")
+    resp = client.get("/auth/kiosk")
+    assert resp.status_code == 200
+    assert resp.json()["registration_enabled"] is False
+
+
 def test_register_duplicate_email(client):
     payload = {"name": "Bob", "email": "bob@example.com", "password": "pass"}
     client.post("/auth/register", json=payload)

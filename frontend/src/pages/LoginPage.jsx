@@ -9,7 +9,7 @@ export default function LoginPage() {
   const [form, setForm] = useState({ name: '', email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const { signIn, kioskMode } = useAuth()
+  const { signIn, kioskMode, registrationEnabled } = useAuth()
   const navigate = useNavigate()
 
   const handleTryDemo = async () => {
@@ -56,7 +56,7 @@ export default function LoginPage() {
         </div>
 
         <div className="flex rounded-lg bg-gray-100 dark:bg-gray-700 p-1 mb-6">
-          {['login', 'register'].map((m) => (
+          {['login', ...(registrationEnabled ? ['register'] : [])].map((m) => (
             <button
               key={m}
               onClick={() => setMode(m)}

@@ -45,6 +45,7 @@ All configuration is via environment variables. Use `.env` for Docker Compose or
 | `ADMIN_EMAIL` | No | Email of the admin account created on first startup |
 | `ADMIN_PASSWORD` | No | Password for the admin account |
 | `ADMIN_NAME` | No | Display name for the admin account (default: `Admin`) |
+| `REGISTRATION_ENABLED` | No | Allow new account registration (default: `true`) |
 | `DATABASE_URL` | No | SQLite path (default) or PostgreSQL connection string |
 | `VAPID_PRIVATE_KEY` | No | VAPID private key — required for push notifications |
 | `VAPID_PUBLIC_KEY` | No | VAPID public key — required for push notifications |
