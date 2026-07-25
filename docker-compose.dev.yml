@@ -11,7 +11,7 @@ services:
   backend:
     build: ./backend
     restart: unless-stopped
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    command: .venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     environment:
       - JWT_SECRET=${JWT_SECRET:-dev-secret-key}
       - DATABASE_URL=sqlite:////data/sprout.db
@@ -31,6 +31,7 @@ services:
       - DEV_MODE=true
     volumes:
       - ./backend:/app             # live source — uvicorn --reload picks up changes
+      - backend_venv:/app/.venv    # preserve image dependencies under the source mount
       - sprout_data:/data
       - sprout_uploads:/app/uploads
       # - ./config.yml:/app/config.yml:ro
@@ -51,6 +52,7 @@ services:
       - backend
 
 volumes:
+  backend_venv:
   sprout_data:
   sprout_uploads:
   frontend_node_modules:
